@@ -11,19 +11,17 @@
 
 | 方式 | 说明 | 入口 |
 |---|---|---|
-| 🐛 反馈问题 | 遇到崩溃、显示异常、逻辑不对 | [提交问题](https://github.com/你的用户名/仓库名/issues/new?template=bug_report.md) |
-| 📖 内容纠错 | **最有价值**：发现知识点写错了 | [提交纠错](https://github.com/你的用户名/仓库名/issues/new?template=content_error.md) |
-| 💡 功能建议 | 希望增加什么功能 | [提交建议](https://github.com/你的用户名/仓库名/issues/new?template=feature_request.md) |
+| 🐛 反馈问题 | 遇到崩溃、显示异常、逻辑不对 | [提交问题](https://github.com/gdx825/tcm-factory/issues/new?template=bug_report.md) |
+| 📖 内容纠错 | **最有价值**：发现知识点写错了 | [提交纠错](https://github.com/gdx825/tcm-factory/issues/new?template=content_error.md) |
+| 💡 功能建议 | 希望增加什么功能 | [提交建议](https://github.com/gdx825/tcm-factory/issues/new?template=feature_request.md) |
 | 📦 分享知识包 | 整理了自己的题库/卡片包，愿意分享 | 见下文第四节 |
 | 💻 提交代码 | 直接改代码 | 见下文第五节 |
-
-> 上面链接中的「你的用户名/仓库名」需要替换为你实际使用的仓库地址。
 
 ---
 
 ## 二、提问前请先确认
 
-1. **用的是最新版本吗？** 很多问题在新版已经修掉了，先看 [Releases](https://github.com/你的用户名/仓库名/releases) 有没有更新。
+1. **用的是最新版本吗？** 很多问题在新版已经修掉了，先看 [Releases](https://github.com/gdx825/tcm-factory/releases) 有没有更新。
 2. **搜索一下已有 Issue**，避免重复。
 3. 报告崩溃时，如果能附上 `adb logcat` 的相关片段，定位速度会快很多。
 
@@ -53,7 +51,7 @@
 **简单做法**（推荐）：
 
 1. 在 App 内进入「卡片管理」，选择一个牌组，点右上角导出按钮，得到一份 JSON
-2. 把这份 JSON 发到 [Discussions](https://github.com/你的用户名/仓库名/discussions) 或 Issue 里
+2. 把这份 JSON 发到 [Discussions](https://github.com/gdx825/tcm-factory/discussions) 或 Issue 里
 
 **进阶做法**（可以让他人通过「知识库更新」自动订阅）：
 
@@ -78,8 +76,8 @@
 | Gradle | 使用工程自带的 `./gradlew`（已锁定 8.11.1） |
 
 ```bash
-git clone https://github.com/你的用户名/仓库名.git
-cd 仓库名
+git clone https://github.com/gdx825/tcm-factory.git
+cd tcm-factory
 
 # 若 sdk.dir 未配置，创建 local.properties：
 #   sdk.dir=/path/to/android-sdk

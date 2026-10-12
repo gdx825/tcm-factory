@@ -30,10 +30,10 @@
 > 首次安装需要允许「安装未知来源应用」。
 > 应用完全开源，你可以自行编译核对，也可以直接使用提供好的安装包。
 
-**国内网络加速下载**（把地址中的用户名与仓库名换成实际的）：
+**国内网络加速下载**（jsDelivr 加速，指向仓库内的同一份 APK）：
 
 ```
-https://cdn.jsdelivr.net/gh/用户名/仓库名@main/中医工厂-v1.5.1.apk
+https://cdn.jsdelivr.net/gh/gdx825/tcm-factory@main/apk/tcm-factory-v1.5.1.apk
 ```
 
 ---
@@ -187,8 +187,8 @@ python3 tools/build_knowledge_packs.py --src app/src/main/assets/knowledge --out
 ### 命令行构建
 
 ```bash
-git clone https://github.com/你的用户名/仓库名.git
-cd 仓库名
+git clone https://github.com/gdx825/tcm-factory.git
+cd tcm-factory
 
 # 若 sdk.dir 未配置，创建 local.properties：
 #   sdk.dir=/path/to/android-sdk
