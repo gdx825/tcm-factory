@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "packId": "tcm.quiz.core",
+  "packName": "题库 · 六科综合练习",
+  "kind": "questions",
+  "version": "1.0.0",
+  "subject": "中药学",
+  "description": "覆盖中药、方剂、针灸、中基、中诊、经典六科的练习题，含单选、多选、判断三种题型。",
+  "license": "自编题目",
+  "sourceNote": "题目为编者自编，知识点依据《中国药典》2025 年版一部、GB/T 12346-2021 与规划教材通行内容。",
+  "items": [
+{"subject":"中药学","chapter":"清热药","type":"SINGLE","stem":"下列哪味药善清下焦湿热，且能泻肝胆实火？","options":["黄芩","黄连","黄柏","龙胆"],"answer":"D","explanation":"龙胆善清下焦湿热、泻肝胆实火。黄芩善清上焦肺热，黄连善清中焦心胃之火，黄柏善清下焦湿热但无泻肝胆实火之功。","difficulty":3,"sourceRef":"《中国药典》2025年版一部"},
+{"subject":"中药学","chapter":"泻下药","type":"SINGLE","stem":"大黄入汤剂欲取其泻下攻积之功，正确用法是？","options":["先煎","后下","包煎","久煎"],"answer":"B","explanation":"大黄泻下成分（结合型蒽醌）久煎易被破坏，故取其攻下时宜后下；若取其清热泻火则不必后下。","difficulty":3,"sourceRef":"《中国药典》2025年版一部"},
+{"subject":"中药学","chapter":"解表药","type":"MULTI","stem":"下列哪些药物具有升举阳气的功效？","options":["柴胡","升麻","黄芪","葛根"],"answer":["A","B","C","D"],"explanation":"柴胡、升麻均能升举阳气；黄芪补气升阳；葛根升发清阳、鼓舞胃气上行。四者均可用于中气下陷证。","difficulty":4,"sourceRef":"《中国药典》2025年版一部"},
+{"subject":"中药学","chapter":"补虚药","type":"JUDGE","stem":"甘草不宜与甘遂、京大戟、芫花、海藻同用。","answer":"对","explanation":"此为「十八反」之一：甘草反甘遂、京大戟、芫花、海藻。同用可能增强毒性或产生不良反应。","difficulty":2,"sourceRef":"中药学配伍禁忌"},
+{"subject":"中药学","chapter":"活血化瘀药","type":"SINGLE","stem":"被称为「血中之气药」、且为治头痛要药的是？","options":["丹参","川芎","延胡索","牛膝"],"answer":"B","explanation":"川芎活血行气，能上行头目、下行血海，为血中之气药，是治头痛要药。延胡索为止痛要药但无「上行头目」之说。","difficulty":2,"sourceRef":"《中国药典》2025年版一部"},
+{"subject":"中药学","chapter":"清热药","type":"MULTI","stem":"下列哪些属于清热凉血药？","options":["生地黄","玄参","牡丹皮","赤芍"],"answer":["A","B","C","D"],"explanation":"四者均属清热凉血药。生地黄、玄参还能养阴，牡丹皮、赤芍还能活血散瘀。","difficulty":2,"sourceRef":"《中国药典》2025年版一部"},
+{"subject":"中药学","chapter":"理气药","type":"SINGLE","stem":"「气病之总司，女科之主帅」指的是哪味药？","options":["木香","香附","陈皮","青皮"],"answer":"B","explanation":"香附疏肝解郁、理气宽中、调经止痛，故被誉为「气病之总司，女科之主帅」。","difficulty":2,"sourceRef":"《中国药典》2025年版一部"},
+{"subject":"中药学","chapter":"止血药","type":"SINGLE","stem":"具有「止血不留瘀，化瘀不伤正」特点的伤科要药是？","options":["白及","三七","仙鹤草","艾叶"],"answer":"B","explanation":"三七散瘀止血、消肿定痛，止血而不留瘀，为伤科要药。白及、仙鹤草偏收敛止血。","difficulty":2,"sourceRef":"《中国药典》2025年版一部"},
+{"subject":"中药学","chapter":"安神药","type":"SINGLE","stem":"治疗心肝阴血不足之虚烦不眠，首选药物是？","options":["朱砂","磁石","酸枣仁","远志"],"answer":"C","explanation":"酸枣仁养心补肝、宁心安神，善治心肝阴血不足之失眠。朱砂、磁石为重镇安神药，适用于实证。","difficulty":2,"sourceRef":"《中国药典》2025年版一部"},
+{"subject":"中药学","chapter":"利水渗湿药","type":"SINGLE","stem":"为治黄疸要药的是？","options":["金钱草","茵陈","车前子","虎杖"],"answer":"B","explanation":"茵陈清利湿热、利胆退黄，为治黄疸要药。金钱草为治石淋要药。","difficulty":1,"sourceRef":"《中国药典》2025年版一部"},
+
+{"subject":"方剂学","chapter":"解表剂","type":"SINGLE","stem":"麻黄汤与桂枝汤的辨证要点区别在于？","options":["有汗与无汗","发热与恶寒","脉浮与脉沉","口渴与不渴"],"answer":"A","explanation":"麻黄汤主治外感风寒表实证（无汗而喘），桂枝汤主治表虚证（汗出恶风）。「有汗无汗」是两者的核心鉴别点。","difficulty":2,"sourceRef":"《伤寒论》"},
+{"subject":"方剂学","chapter":"和解剂","type":"SINGLE","stem":"小柴胡汤中「和解少阳」的核心药对是？","options":["柴胡与黄芩","人参与甘草","半夏与生姜","人参与大枣"],"answer":"A","explanation":"柴胡透泄少阳之邪、黄芩清泄少阳之热，一散一清，共奏和解少阳之功，为方中核心药对。","difficulty":3,"sourceRef":"《伤寒论》"},
+{"subject":"方剂学","chapter":"补益剂","type":"SINGLE","stem":"六味地黄丸中「三补」指的是？","options":["熟地黄、山茱萸、山药","熟地黄、泽泻、茯苓","山茱萸、牡丹皮、泽泻","熟地黄、山药、牡丹皮"],"answer":"A","explanation":"「三补」为熟地黄、山茱萸、山药，滋补肝脾肾之阴；「三泻」为泽泻、茯苓、牡丹皮，渗湿泄浊。","difficulty":2,"sourceRef":"《小儿药证直诀》"},
+{"subject":"方剂学","chapter":"清热剂","type":"SINGLE","stem":"龙胆泻肝汤的功用是？","options":["清泻肝胆实火，清利肝经湿热","清热解毒，消肿散结","清胃凉血","清心利水养阴"],"answer":"A","explanation":"龙胆泻肝汤主治肝胆实火上炎与肝经湿热下注，功用为清泻肝胆实火、清利肝经湿热。","difficulty":2,"sourceRef":"《医方集解》"},
+{"subject":"方剂学","chapter":"温里剂","type":"SINGLE","stem":"小建中汤是在桂枝汤基础上如何变化的？","options":["倍芍药加饴糖","加黄芪","去生姜加干姜","加当归"],"answer":"A","explanation":"小建中汤即桂枝汤倍芍药、加饴糖而成，功用温中补虚、和里缓急。","difficulty":3,"sourceRef":"《伤寒论》"},
+{"subject":"方剂学","chapter":"理血剂","type":"SINGLE","stem":"补阳还五汤中用量最重（君药）的是？","options":["当归尾","生黄芪","赤芍","川芎"],"answer":"B","explanation":"补阳还五汤重用生黄芪（原方四两）大补脾胃之气，使气行则血行，为方中君药。","difficulty":3,"sourceRef":"《医林改错》"},
+{"subject":"方剂学","chapter":"祛湿剂","type":"SINGLE","stem":"「三仁汤」中的「三仁」分别起什么作用？","options":["宣上、畅中、渗下","补气、补血、补阴","清热、祛湿、化痰","温中、散寒、止痛"],"answer":"A","explanation":"杏仁宣利上焦肺气，白豆蔻畅中焦脾气，薏苡仁渗利下焦湿邪，合而宣畅气机、清利湿热，为治湿温之总纲。","difficulty":4,"sourceRef":"《温病条辨》"},
+{"subject":"方剂学","chapter":"祛痰剂","type":"SINGLE","stem":"半夏白术天麻汤由二陈汤加哪两味药组成？","options":["白术、天麻","白术、钩藤","天麻、胆南星","白术、胆南星"],"answer":"A","explanation":"半夏白术天麻汤即二陈汤加白术、天麻，功用化痰息风、健脾祛湿，主治风痰上扰之眩晕。","difficulty":3,"sourceRef":"《医学心悟》"},
+{"subject":"方剂学","chapter":"固涩剂","type":"SINGLE","stem":"四神丸主治的五更泄泻，其病机是？","options":["脾肾阳虚","脾胃气虚","肝郁脾虚","湿热下注"],"answer":"A","explanation":"四神丸温肾暖脾、固肠止泻，主治脾肾阳虚所致的五更泄泻（又称鸡鸣泻）。","difficulty":2,"sourceRef":"《内科摘要》"},
+
+{"subject":"针灸学","chapter":"常用腧穴","type":"SINGLE","stem":"八会穴中的「血会」是哪个穴位？","options":["膈俞","膻中","阳陵泉","绝骨"],"answer":"A","explanation":"膈俞为血会；膻中为气会，阳陵泉为筋会，绝骨（悬钟）为髓会。","difficulty":3,"sourceRef":"GB/T 12346-2021"},
+{"subject":"针灸学","chapter":"常用腧穴","type":"SINGLE","stem":"下列哪个穴位孕妇应当禁用？","options":["合谷","足三里","曲池","手三里"],"answer":"A","explanation":"合谷能引起子宫收缩，孕妇禁用；三阴交、肩井、昆仑等亦属孕妇禁用或慎用穴。","difficulty":2,"sourceRef":"GB/T 12346-2021"},
+{"subject":"针灸学","chapter":"常用腧穴","type":"SINGLE","stem":"「四总穴歌」中「头项寻」的是哪个穴位？","options":["列缺","合谷","委中","足三里"],"answer":"A","explanation":"四总穴歌：肚腹三里留，腰背委中求，头项寻列缺，面口合谷收。","difficulty":1,"sourceRef":"针灸学歌赋"},
+{"subject":"针灸学","chapter":"常用腧穴","type":"SINGLE","stem":"中脘穴在任脉上的定位是？","options":["脐中上 4 寸","脐中上 3 寸","脐中下 4 寸","脐中下 3 寸"],"answer":"A","explanation":"中脘位于上腹部，脐中上 4 寸，前正中线上，为胃之募穴、八会穴之腑会。脐中下 3 寸为关元。","difficulty":2,"sourceRef":"GB/T 12346-2021"},
+{"subject":"针灸学","chapter":"经络循行","type":"JUDGE","stem":"足阳明胃经的循行走向是「从头走足」。","answer":"对","explanation":"十二正经循行走向：手三阴从胸走手，手三阳从手走头，足三阳从头走足，足三阴从足走腹（胸）。足阳明胃经属足三阳，故从头走足。","difficulty":2,"sourceRef":"《灵枢·逆顺肥瘦》"},
+{"subject":"针灸学","chapter":"常用腧穴","type":"MULTI","stem":"下列哪些穴位是八脉交会穴？","options":["内关","外关","列缺","照海"],"answer":["A","B","C","D"],"explanation":"内关通阴维脉，外关通阳维脉，列缺通任脉，照海通阴跷脉，四者均为八脉交会穴。","difficulty":3,"sourceRef":"针灸学"}, 
+
+{"subject":"中医基础理论","chapter":"藏象","type":"SINGLE","stem":"被称为「后天之本」「气血生化之源」的脏是？","options":["心","肝","脾","肾"],"answer":"C","explanation":"脾主运化水谷精微，为气血生化之源；因出生后所需营养全赖脾胃运化，故称「后天之本」。肾为「先天之本」。","difficulty":1,"sourceRef":"规划教材《中医基础理论》"},
+{"subject":"中医基础理论","chapter":"气血津液","type":"SINGLE","stem":"行于脉外、具有防御和温煦作用的气是？","options":["元气","宗气","营气","卫气"],"answer":"D","explanation":"卫气行于脉外，属阳，主护卫肌表、温养脏腑、调控汗孔开合。营气行于脉中，主营养。","difficulty":2,"sourceRef":"规划教材《中医基础理论》"},
+{"subject":"中医基础理论","chapter":"病因病机","type":"SINGLE","stem":"具有「善行而数变」特点的邪气是？","options":["风邪","寒邪","湿邪","燥邪"],"answer":"A","explanation":"风邪善行而数变，指其致病部位游走不定、发病急骤、变化多端。风为百病之长。","difficulty":1,"sourceRef":"规划教材《中医基础理论》"},
+{"subject":"中医基础理论","chapter":"防治原则","type":"SINGLE","stem":"「热因热用」属于下列哪种治法？","options":["正治","反治","标本同治","因时制宜"],"answer":"B","explanation":"「热因热用」即用热性药物治疗假热症状，属反治（从治）之法，用于真寒假热证。","difficulty":3,"sourceRef":"规划教材《中医基础理论》"},
+{"subject":"中医基础理论","chapter":"病因病机","type":"MULTI","stem":"瘀血的形成与下列哪些因素有关？","options":["气虚","气滞","血寒","外伤"],"answer":["A","B","C","D"],"explanation":"气虚推动无力、气滞血行不畅、血寒凝滞、外伤血溢脉外，均可导致瘀血；血热亦可使血行异常而成瘀。","difficulty":3,"sourceRef":"规划教材《中医基础理论》"},
+
+{"subject":"中医诊断学","chapter":"八纲辨证","type":"SINGLE","stem":"下列哪一项最支持表证的诊断？","options":["脉浮、恶寒发热并见","脉沉、腹痛拒按","舌红苔黄、口渴喜冷饮","神疲乏力、少气懒言"],"answer":"A","explanation":"表证以发热恶寒（恶寒重）并见、头身疼痛、鼻塞、脉浮为主要特征，「有一分恶寒便有一分表证」。","difficulty":2,"sourceRef":"规划教材《中医诊断学》"},
+{"subject":"中医诊断学","chapter":"四诊","type":"SINGLE","stem":"舌色淡白最常提示？","options":["气血两虚或阳虚","热入营血","瘀血内阻","食积化热"],"answer":"A","explanation":"淡白舌主气血两虚、阳虚；红舌主热证；绛舌主热入营血或阴虚火旺；青紫舌主血瘀、寒凝或热毒。","difficulty":2,"sourceRef":"规划教材《中医诊断学》"},
+{"subject":"中医诊断学","chapter":"脏腑辨证","type":"SINGLE","stem":"患者胁肋胀痛、情志抑郁、善太息、脉弦，最可能的证型是？","options":["肝气郁结证","脾气虚证","心火亢盛证","肾阳虚证"],"answer":"A","explanation":"胁肋胀痛、情志抑郁、善太息、脉弦为肝气郁结的典型表现，治以疏肝解郁。","difficulty":2,"sourceRef":"规划教材《中医诊断学》"},
+{"subject":"中医诊断学","chapter":"四诊","type":"SINGLE","stem":"「假神」的临床意义是？","options":["阴阳即将离决的危候","病情轻浅","正气来复","邪去正安"],"answer":"A","explanation":"假神指久病重病之人突然精神好转、言语不休、食欲大增，为阴阳即将离决的危候，俗称「回光返照」。","difficulty":3,"sourceRef":"规划教材《中医诊断学》"},
+
+{"subject":"中医经典","chapter":"伤寒论","type":"JUDGE","stem":"《伤寒论》提出「有柴胡证，但见一证便是，不必悉具」。","answer":"对","explanation":"出自《伤寒论》第 101 条，是小柴胡汤应用的重要原则，说明少阳证不必所有症状齐备即可使用。","difficulty":2,"sourceRef":"《伤寒论·辨太阳病脉证并治中》"},
+{"subject":"中医经典","chapter":"金匮要略","type":"JUDGE","stem":"《金匮要略》提出「病痰饮者，当以温药和之」。","answer":"对","explanation":"出自《金匮要略·痰饮咳嗽病脉证并治》，指出痰饮属阴邪，得温则行，故治当以温药调和。","difficulty":2,"sourceRef":"《金匮要略》"}
+  ]
+}

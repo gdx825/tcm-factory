@@ -1,0 +1,24 @@
+# ---------- 构建产物 ----------
+build/
+.gradle/
+.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
+*.iml
+
+# ---------- 本地配置 ----------
+# 含本机 SDK 路径，因机器而异
+local.properties
+.idea/
+.DS_Store
+
+# ---------- 签名密钥（绝对不能提交） ----------
+# 密钥库与口令一旦泄露，他人即可签出与你完全相同的签名，
+# 伪造「官方更新」去覆盖安装你已经发布给用户的版本。
+*.jks
+*.keystore
+keystore.properties
+
+# ---------- 知识库打包产物 ----------
+dist/

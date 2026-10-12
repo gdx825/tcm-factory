@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 米白纸感，避免纯白眩光 -->
+    <color name="tcm_window_bg">#FAF8F3</color>
+    <color name="ic_launcher_background">#2F6F62</color>
+</resources>

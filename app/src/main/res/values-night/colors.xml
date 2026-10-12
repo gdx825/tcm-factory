@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 墨灰，避免纯黑在 OLED 上的拖影与眩光 -->
+    <color name="tcm_window_bg">#1C1B19</color>
+</resources>

@@ -1,0 +1,39 @@
+MIT License
+
+Copyright (c) 2026 厂吴 (ChangWu)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## 附加说明：知识与数据内容
+
+MIT 协议适用于本项目的**软件代码**。
+
+内置知识库内容（`app/src/main/assets/knowledge/` 与 `SeedData.kt`）由以下部分构成：
+
+- **公有领域古籍原文**（《伤寒论》《金匮要略》《黄帝内经》《温病条辨》等）
+- **国家标准中的事实性数据**（《中国药典》2025 年版一部的药材功效、
+  GB/T 12346-2021 的腧穴定位）
+- **编者自行组织的考点条目与练习题**
+
+上述内容同样按 MIT 协议开放使用。
+
+**但请注意**：软件内置的医学内容仅供学习参考，**不构成诊疗建议**，
+不得用于临床决策。详见 README 的免责声明。
