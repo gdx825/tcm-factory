@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -40,6 +41,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -81,10 +85,26 @@ data class QuizHomeUiState(
     val tab: Int = 0,
     val loading: Boolean = true,
     val lastImport: ImportSummary? = null,
-    val importError: String? = null
+    val importError: String? = null,
+    /** 已解析、等待用户确认科目名的导入。 */
+    val pendingImport: PendingImport? = null
 ) {
     val hasQuestions: Boolean get() = totalQuestions > 0
 }
+
+/**
+ * 待确认的导入。
+ *
+ * 先解析出题量与科目名让用户过目，而不是选完文件就直接入库 ——
+ * 这样用户既能看到「导了多少题」，也能改名，还能在发现选错文件时取消。
+ */
+data class PendingImport(
+    val fileName: String,
+    /** 预填值：JSON 里声明的 subject 优先，没写则退回文件名。 */
+    val defaultSubject: String,
+    val questionCount: Int,
+    val packName: String
+)
 
 @HiltViewModel
 class QuizHomeViewModel @Inject constructor(
@@ -156,10 +176,17 @@ class QuizHomeViewModel @Inject constructor(
         _uiState.update { it.copy(lastImport = null, importError = null) }
     }
 
-    fun importPack(uri: Uri) {
+    /** 待确认导入的原始 JSON，确认时直接复用，避免再读一次文件。 */
+    private var pendingRaw: String? = null
+
+    /**
+     * 用户选完文件：先解析出来、弹出确认框让用户核对题量并填写科目名。
+     * 真正入库在 [confirmImport] 里做。
+     */
+    fun prepareImport(uri: Uri) {
         viewModelScope.launch {
             val name = queryDisplayName(uri)
-            val raw = withContext(Dispatchers.IO) {
+            val bytes = withContext(Dispatchers.IO) {
                 runCatching {
                     context.contentResolver.openInputStream(uri)?.use { input ->
                         input.readBytes()
@@ -167,25 +194,63 @@ class QuizHomeViewModel @Inject constructor(
                 }.getOrNull()
             }
 
-            if (raw == null || raw.isEmpty()) {
+            if (bytes == null || bytes.isEmpty()) {
                 _uiState.update { it.copy(importError = "无法读取文件：$name") }
                 return@launch
             }
-            if (raw.size > MAX_PACK_SIZE) {
+            if (bytes.size > MAX_PACK_SIZE) {
                 _uiState.update { it.copy(importError = "题库文件超过 20MB") }
                 return@launch
             }
 
-            val text = String(raw, Charsets.UTF_8)
-            val summary = runCatching { quizRepository.importPack(text) }.getOrNull()
+            val text = String(bytes, Charsets.UTF_8)
+            val outcome = runCatching {
+                com.tcmfactory.core.quiz.QuestionPackParser.parse(text).getOrThrow()
+            }.getOrNull()
+
+            if (outcome == null) {
+                _uiState.update { it.copy(importError = "格式无法识别，请确认是标准题库 JSON") }
+                return@launch
+            }
+
+            pendingRaw = text
+            val declared = outcome.subject.trim()
+            _uiState.update {
+                it.copy(
+                    pendingImport = PendingImport(
+                        fileName = name,
+                        // 预填优先级：JSON 声明的科目 → 文件名（去掉扩展名）
+                        defaultSubject = declared.ifEmpty { name.substringBeforeLast('.') },
+                        questionCount = outcome.accepted.size,
+                        packName = outcome.packName
+                    )
+                )
+            }
+        }
+    }
+
+    /** 用户确认科目名后真正入库。 */
+    fun confirmImport(subject: String) {
+        val raw = pendingRaw ?: return
+        viewModelScope.launch {
+            val summary = runCatching {
+                quizRepository.importPack(raw, subjectOverride = subject)
+            }.getOrNull()
+            pendingRaw = null
 
             if (summary == null) {
-                _uiState.update { it.copy(importError = "格式无法识别，请确认是标准题库 JSON") }
+                _uiState.update { it.copy(pendingImport = null, importError = "导入失败") }
             } else {
-                _uiState.update { it.copy(lastImport = summary) }
+                _uiState.update { it.copy(pendingImport = null, lastImport = summary) }
                 refresh()
             }
         }
+    }
+
+    /** 用户在确认框里点了取消。 */
+    fun cancelImport() {
+        pendingRaw = null
+        _uiState.update { it.copy(pendingImport = null) }
     }
 
     private fun queryDisplayName(uri: Uri): String = runCatching {
@@ -207,7 +272,7 @@ fun QuizHomeScreen(
     val picker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
-        if (uri != null) viewModel.importPack(uri)
+        if (uri != null) viewModel.prepareImport(uri)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -278,6 +343,13 @@ fun QuizHomeScreen(
         }
     }
 
+    state.pendingImport?.let { pending ->
+        ImportConfirmDialog(
+            pending = pending,
+            onConfirm = viewModel::confirmImport,
+            onCancel = viewModel::cancelImport
+        )
+    }
     state.lastImport?.let { summary ->
         ImportResultDialog(summary = summary, onDismiss = viewModel::dismissImportResult)
     }
@@ -591,6 +663,67 @@ private fun WrongBookTab(
             }
         }
     }
+}
+
+/**
+ * 导入确认框。
+ *
+ * 存在的意义是解决一个真实问题：导入的题库若没写科目名（或写了 App 不认识的名字），
+ * 几十个题库会全部挤进「其他」里无法区分。所以这里把科目名交回给用户，
+ * 并预填一个合理默认值（JSON 声明 → 文件名）。
+ */
+@Composable
+private fun ImportConfirmDialog(
+    pending: PendingImport,
+    onConfirm: (String) -> Unit,
+    onCancel: () -> Unit
+) {
+    var subject by remember(pending) { mutableStateOf(pending.defaultSubject) }
+    val canImport = subject.isNotBlank()
+
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text("导入题库") },
+        text = {
+            Column {
+                Text(
+                    text = pending.fileName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = "可导入 ${pending.questionCount} 题",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(18.dp))
+                OutlinedTextField(
+                    value = subject,
+                    onValueChange = { subject = it },
+                    label = { Text("科目名称") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    supportingText = {
+                        Text(
+                            text = "刷题首页按这个名称分组，可改成任意名字",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(subject.trim()) }, enabled = canImport) {
+                Text("导入")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancel) { Text("取消") }
+        }
+    )
 }
 
 @Composable

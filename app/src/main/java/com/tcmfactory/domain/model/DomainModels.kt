@@ -203,5 +203,8 @@ fun subjectLabel(subject: String): String = when (subject) {
     "ACUPUNCTURE" -> "针灸学"
     "CLASSICS" -> "中医经典"
     "CUSTOM" -> "自定义"
-    else -> "其他"
+    // 未知科目**原样返回**，而不是一律塌缩成「其他」。
+    // 导入外部题库时，JSON 里声明的科目名（如「中医基础理论」）或用户自填的名称
+    // 都需要正确显示；否则几十个不同科目会全部挤在「其他」里无法区分。
+    else -> subject.trim().ifEmpty { "其他" }
 }

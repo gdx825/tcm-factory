@@ -33,7 +33,7 @@
 **国内网络加速下载**（jsDelivr 加速，指向仓库内的同一份 APK）：
 
 ```
-https://cdn.jsdelivr.net/gh/gdx825/tcm-factory@main/apk/tcm-factory-v1.5.2.apk
+https://cdn.jsdelivr.net/gh/gdx825/tcm-factory@main/apk/tcm-factory-v1.5.3.apk
 ```
 
 ---

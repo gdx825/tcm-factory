@@ -99,13 +99,15 @@ class QuizRepository @Inject constructor(
 
     // ---------------- 导入 ----------------
 
-    suspend fun importPack(raw: String): ImportSummary {
+    suspend fun importPack(raw: String, subjectOverride: String? = null): ImportSummary {
         val outcome = QuestionPackParser.parse(raw).getOrThrow()
         val now = System.currentTimeMillis()
+        // 导入时可自定义科目名；传空则用 JSON 里声明的 subject。
+        val subject = subjectOverride?.trim()?.takeIf { it.isNotEmpty() } ?: outcome.subject
 
         val entities = outcome.accepted.map { q ->
             QuestionEntity(
-                subject = outcome.subject,
+                subject = subject,
                 chapter = q.chapter,
                 type = q.type.name,
                 stem = q.stem,
@@ -125,7 +127,7 @@ class QuizRepository @Inject constructor(
 
         return ImportSummary(
             packName = outcome.packName,
-            subject = outcome.subject,
+            subject = subject,
             imported = entities.size,
             rejected = outcome.rejected
         )
