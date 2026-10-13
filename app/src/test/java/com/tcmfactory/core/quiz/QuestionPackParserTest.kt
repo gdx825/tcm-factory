@@ -215,4 +215,89 @@ class QuestionPackParserTest {
         assertEquals(0, outcome.total)
         assertFalse(outcome.hasUsableContent)
     }
+
+    // ================================================================
+    //  回归测试：选项前缀剥离不能误伤内容本身
+    //
+    //  起因（用户反馈的真实 bug）：
+    //    「桂枝汤中桂枝与芍药的用量比例是？」四个选项显示成 1 / 2 / 1 / 2，
+    //    原因是数字序号剥离正则把 `1:1` 里的 `1:` 当成了序号前缀剥掉。
+    //
+    //  这类缺陷的共性是：**解析成功、不报错、界面正常，只是内容错了**。
+    //  所以必须靠断言原始内容来兜住。
+    // ================================================================
+
+    @Test
+    fun `比例形式选项不会被误剥离`() {
+        val outcome = parse(
+            """
+            {"packName":"回归","questions":[
+              {"stem":"桂枝汤中桂枝与芍药的用量比例是？",
+               "options":["1:1","1:2","2:1","3:2"],
+               "answer":"A",
+               "explanation":"桂枝与芍药等量配伍，一散一收，调和营卫。"}
+            ]}
+            """.trimIndent()
+        )
+        val q = outcome.accepted.single()
+        assertEquals(listOf("1:1", "1:2", "2:1", "3:2"), q.options)
+        assertEquals(listOf(0), q.answers)
+    }
+
+    @Test
+    fun `全角冒号的比例同样不被剥离`() {
+        val outcome = parse(
+            """{"packName":"回归","questions":[
+                 {"stem":"比例","options":["1：1","2：1"],"answer":"A"}]}"""
+        )
+        assertEquals(listOf("1：1", "2：1"), outcome.accepted.single().options)
+    }
+
+    @Test
+    fun `小数形式选项不会被误剥离`() {
+        val outcome = parse(
+            """{"packName":"回归","questions":[
+                 {"stem":"每次服多少","options":["1.5 克","2.5 克","5 克","10 克"],"answer":"B"}]}"""
+        )
+        assertEquals(
+            listOf("1.5 克", "2.5 克", "5 克", "10 克"),
+            outcome.accepted.single().options
+        )
+    }
+
+    @Test
+    fun `数字序号前缀仍会被正确剥离`() {
+        val outcome = parse(
+            """{"packName":"回归","questions":[
+                 {"stem":"麻黄的功效是","options":["1. 发汗解表","2、宣肺平喘","3) 利水消肿","4）温中止呕"],"answer":"A"}]}"""
+        )
+        assertEquals(
+            listOf("发汗解表", "宣肺平喘", "利水消肿", "温中止呕"),
+            outcome.accepted.single().options
+        )
+    }
+
+    @Test
+    fun `字母前缀里的冒号仍会被剥离`() {
+        val outcome = parse(
+            """{"packName":"回归","questions":[
+                 {"stem":"桂枝的功效是","options":["A: 发汗解肌","B：温通经脉","C. 助阳化气","D、平冲降逆"],"answer":"A"}]}"""
+        )
+        assertEquals(
+            listOf("发汗解肌", "温通经脉", "助阳化气", "平冲降逆"),
+            outcome.accepted.single().options
+        )
+    }
+
+    @Test
+    fun `含数字但非序号开头的内容保持不变`() {
+        val outcome = parse(
+            """{"packName":"回归","questions":[
+                 {"stem":"用法","options":["10:1 浓缩","饭后 30 分钟服","睡前服","空腹服"],"answer":"B"}]}"""
+        )
+        assertEquals(
+            listOf("10:1 浓缩", "饭后 30 分钟服", "睡前服", "空腹服"),
+            outcome.accepted.single().options
+        )
+    }
 }

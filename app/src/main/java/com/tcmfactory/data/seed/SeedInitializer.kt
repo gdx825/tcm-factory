@@ -40,7 +40,9 @@ class SeedInitializer @Inject constructor(
     suspend fun seedIfNeeded() = withContext(Dispatchers.IO) {
         seedCards()
         seedBooks()
-        seedQuizzes()
+        // 必须先清掉早期版本写在库里的内置题库，再由知识包装入正确内容，
+        // 否则同一道题会出现两次（详见 purgeLegacyBuiltinQuestions 的说明）。
+        purgeLegacyBuiltinQuestions()
         installBundledKnowledgePacks()
     }
 
@@ -89,9 +91,17 @@ class SeedInitializer @Inject constructor(
         Log.i(TAG, "内置知识包安装完成：新增 $added 条，更新 $updated 条")
     }
 
-    /** 内置示例题库：让用户开箱即可体验刷题与错题本。 */
-    private suspend fun seedQuizzes() {
-        runCatching { quizRepository.seedIfEmpty() }
+    /**
+     * 清理早期版本直接写入数据库的内置题库。
+     *
+     * 题库现已统一由知识包分发（见 [installBundledKnowledgePacks]）。
+     * 旧记录不仅会与新内容重复，还可能残留解析缺陷时期的错误选项文本。
+     */
+    private suspend fun purgeLegacyBuiltinQuestions() {
+        runCatching {
+            val removed = quizRepository.purgeLegacyBuiltinQuestions()
+            if (removed > 0) Log.i(TAG, "已清理旧版内置题库 $removed 条")
+        }
     }
 
     /** 内置演示古籍：让用户开箱即可体验阅读器与读经制卡。 */

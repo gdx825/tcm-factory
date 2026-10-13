@@ -31,9 +31,25 @@ object QuestionPackParser {
         val hasUsableContent: Boolean get() = accepted.isNotEmpty()
     }
 
-    /** 选项前缀形如 `A.` `A、` `A)` `A）` `A `，解析时剥离。 */
+    /**
+     * 选项的**字母前缀**，形如 `A.` `A、` `A)` `A）` `A:`，解析时剥离。
+     * 前缀限定为字母，因此不会与数字内容（如比例 `1:1`、小数 `1.5`）冲突。
+     */
     private val OPTION_PREFIX = Regex("""^\s*([A-Za-z])\s*[.、．)）:：]\s*""")
-    private val LEADING_INDEX = Regex("""^\s*(\d{1,2})\s*[.、．)）:：]\s*""")
+
+    /**
+     * 选项的**数字序号前缀**，形如 `1.` `1、` `1)` `1）`，解析时剥离。
+     *
+     * ⚠️ 两处刻意的限制，都来自真实缺陷（用户反馈）：
+     *  1. **不含冒号**。原先含 `:` `：`，导致比例类选项被拦腰截断——
+     *     `1:1` 被剥成 `1`、`1:2` 被剥成 `2`，四个选项全部显示错。
+     *  2. **要求序号前导符之后不是数字**。否则小数类选项 `1.5 克` 会被剥成 `5 克`。
+     *
+     * 取舍原则：**宁可少剥离，也不能错剥离**。
+     * 少剥离的代价只是选项前多个 `1、`（不影响作答）；
+     * 错剥离的代价是显示错误内容、直接误导作答。
+     */
+    private val LEADING_INDEX = Regex("""^\s*\d{1,2}\s*[.、．)）]\s*(?=[^\d\s])""")
 
     fun parse(raw: String): Result<ParseOutcome> = runCatching {
         val dto = json.decodeFromString<QuestionPackDto>(raw)

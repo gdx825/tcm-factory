@@ -124,6 +124,18 @@ interface QuizDao {
         """
     )
     suspend fun getWrongQuestionsWithDetail(): List<QuestionEntity>
+
+    /**
+     * 按题库包标识批量删除题目。
+     *
+     * 用于清理**早期版本的内置题库**：那批题目由 SeedQuestionPacks 直接写入，
+     * packId 取的是中文包名。现在题库已统一迁入知识包，旧记录必须删掉，
+     * 否则同一道题会在题库里出现两次。
+     *
+     * @return 实际删除条数
+     */
+    @Query("DELETE FROM questions WHERE packId IN (:packIds)")
+    suspend fun deleteByPackIds(packIds: List<String>): Int
 }
 
 data class SubjectCountRow(val subject: String, val count: Int)

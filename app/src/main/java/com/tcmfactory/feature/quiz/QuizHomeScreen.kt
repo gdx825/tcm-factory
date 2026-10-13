@@ -100,10 +100,9 @@ class QuizHomeViewModel @Inject constructor(
     val uiState: StateFlow<QuizHomeUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            quizRepository.seedIfEmpty()
-            refresh()
-        }
+        // 内置题库已统一由知识包在 App 启动时分发（见 SeedInitializer），
+        // 这里不再需要「题库为空就写入示例题」的兜底逻辑。
+        refresh()
         viewModelScope.launch {
             quizRepository.observeWrongCount().collect { count ->
                 _uiState.update { it.copy(wrongCount = count) }

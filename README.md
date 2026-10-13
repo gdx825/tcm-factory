@@ -1,7 +1,7 @@
 # 中医工厂 · TCM Factory
 
 > 面向中医学专业学生的中医考研（307 中医综合）与执业医师资格考试备考工具。
-> **完全离线可用** · 内置 497 条权威来源知识 · 无账号、无广告、不收集任何数据。
+> **完全离线可用** · 内置 555 条权威来源知识 · 无账号、无广告、不收集任何数据。
 
 [![Platform](https://img.shields.io/badge/Android-8.0%2B-brightgreen)]()
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0-blue)]()
@@ -33,7 +33,7 @@
 **国内网络加速下载**（jsDelivr 加速，指向仓库内的同一份 APK）：
 
 ```
-https://cdn.jsdelivr.net/gh/gdx825/tcm-factory@main/apk/tcm-factory-v1.5.1.apk
+https://cdn.jsdelivr.net/gh/gdx825/tcm-factory@main/apk/tcm-factory-v1.5.2.apk
 ```
 
 ---
@@ -73,7 +73,7 @@ https://cdn.jsdelivr.net/gh/gdx825/tcm-factory@main/apk/tcm-factory-v1.5.1.apk
 
 ## 内置知识库
 
-共 **497 条**，全部标注来源：
+共 **555 条**，全部标注来源：
 
 | 知识包 | 条目 | 内容 |
 |---|---:|---|
@@ -82,7 +82,10 @@ https://cdn.jsdelivr.net/gh/gdx825/tcm-factory@main/apk/tcm-factory-v1.5.1.apk
 | 针灸学 | 58+30 | 高频腧穴定位归经 + 十二正经与奇经八脉循行 |
 | 经典条文 | 34+25 | 《伤寒论》《金匮要略》《黄帝内经》《温病条辨》 |
 | 中基中诊 | 39 | 阴阳五行、藏象、气血津液、病因病机、治则、四诊、八纲、脏腑辨证 |
-| 练习题 | 36+24 | 六科综合练习，含单选 / 多选 / 判断 |
+| 题库 · 六科综合 | 61 | 中药、方剂、针灸、中基、中诊、经典，含单选 / 多选 / 判断 |
+| 题库 · 中医内科学 | 33 | 23 个常见病证的辨证要点与代表方剂 |
+
+另有 **99 张入门背诵卡片**（覆盖中药 / 方剂 / 穴位 / 经络 / 经典），让首次打开就能立即体验背诵流程。
 
 ### 内容来源
 
@@ -241,7 +244,7 @@ app/src/main/java/com/tcmfactory/
 ├── domain/                # 领域模型与用例
 └── feature/               # 界面：recite / reader / quiz / stats / knowledge / settings
 
-app/src/main/assets/knowledge/  # 内置知识包（6 个 / 398 条）
+app/src/main/assets/knowledge/  # 内置知识包（7 个 / 456 条）
 tools/build_knowledge_packs.py  # 知识库打包发布工具
 docs/                           # 各阶段设计文档（[索引](docs/README.md)）
 ```
@@ -262,14 +265,14 @@ docs/                           # 各阶段设计文档（[索引](docs/README.m
 | 遗忘曲线算法 | 19 |
 | 答案解析（多格式容错 + 往返一致性） | 18 |
 | 文本管线（编码探测 / 重排 / 切分） | 17 |
-| 题库解析 | 16 |
+| 题库解析（含选项前缀剥离回归） | 22 |
 | 网络下载（MockWebServer，含体积上限与篡改检测） | 8 |
 
 ---
 
 ## 待办
 
-- [ ] 继续扩充知识库（优先补中医内科学、方剂歌诀、诊断学问答）
+- [ ] 继续扩充知识库（优先补方剂歌诀、诊断学问答、中药鉴别）
 - [ ] 错题本接上遗忘曲线，做真正的错题复习计划
 - [ ] 开启 R8 混淆瘦身（规则已备好，见 `app/proguard-rules.pro`）
 - [ ] 知识包签名（Ed25519），为第三方内容生态做准备

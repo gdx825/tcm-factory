@@ -264,4 +264,14 @@ REMOVED ←───────────────────────
 | 界面 | `feature/quiz/QuizHomeScreen.kt`、`feature/quiz/QuizSessionScreen.kt` |
 | 单元测试 | `test/.../core/quiz/QuestionPackParserTest.kt`、`AnswerNormalizerTest.kt` |
 
-内置示例题库见 `app/src/main/assets/knowledge/tcm.quiz.core.json`（36 题，含六科）。
+内置题库统一以知识包形式分发（因此可被数据源上的新版本覆盖更新）：
+
+| 知识包 | 题量 | 覆盖 |
+|---|---:|---|
+| `tcm.quiz.core` | 61 | 中药、方剂、针灸、中基、中诊、经典 |
+| `tcm.quiz.internal` | 33 | 中医内科学 23 个常见病证 |
+
+> **历史沿革**：题库最初硬编码在 `SeedQuestionPacks.kt` 里，后来统一迁入知识包。
+> 迁移的必要性来自一个真实缺陷——早期解析正则把数字序号前缀的冒号也当作分隔符，
+> 使比例类选项 `1:1` 被剥成 `1`。这类错误文本已经落库，只能清掉旧记录、
+> 由知识包重新导入。详见第四节的答案容错说明。

@@ -10,7 +10,6 @@ import com.tcmfactory.core.database.entity.QuizRecordEntity
 import com.tcmfactory.core.database.entity.QuizSessionEntity
 import com.tcmfactory.core.database.entity.WrongQuestionEntity
 import com.tcmfactory.core.quiz.QuestionPackParser
-import com.tcmfactory.data.seed.SeedQuestionPacks
 import com.tcmfactory.domain.model.Question
 import com.tcmfactory.domain.model.QuizMode
 import com.tcmfactory.domain.model.SubjectQuestionCount
@@ -64,16 +63,39 @@ class QuizRepository @Inject constructor(
     private companion object {
         const val MASTER_THRESHOLD = 2
         const val DEFAULT_SESSION_SIZE = 20
+
+        /**
+         * 早期版本内置题库的 packId（当时直接用了 packName）。
+         * 这批题目现已全部迁入知识包，此列表仅用于一次性清理。
+         */
+        val LEGACY_BUILTIN_PACKS = listOf(
+            "中药学 · 解表药与清热药",
+            "方剂学 · 常用方剂组成与主治",
+            "针灸学 · 常用腧穴定位",
+            "我的题库"
+        )
     }
 
-    // ---------------- 内置示例题库 ----------------
+    // ---------------- 内置题库 ----------------
 
-    suspend fun seedIfEmpty() {
-        if (quizDao.countQuestions() > 0) return
-        SeedQuestionPacks.packs.forEach { raw ->
-            runCatching { importPack(raw) }
-        }
-    }
+    /**
+     * 清理早期版本直接写入数据库的内置题库。
+     *
+     * 背景：内置题库原先是 SeedQuestionPacks 里的 Kotlin 字符串，直接调 [importPack] 写入，
+     * packId 用的是中文包名；现已统一迁移到知识包（tcm.quiz.core / tcm.quiz.internal），
+     * 走 [KnowledgeRepository.installFromBytes] 通道分发。
+     *
+     * 不清理会有两个后果：
+     *  1. 同一道题在题库里出现两次（新旧通道各一条）；
+     *  2. **旧记录的内容可能是错的**——早期解析正则会误把比例类选项 `1:1` 剥成 `1`，
+     *     这些错误文本已经落库，只能删掉、由知识包重新导入正确内容。
+     *
+     * 天然幂等：没有旧数据时返回 0。
+     *
+     * @return 实际删除的题目数
+     */
+    suspend fun purgeLegacyBuiltinQuestions(): Int =
+        quizDao.deleteByPackIds(LEGACY_BUILTIN_PACKS)
 
     // ---------------- 导入 ----------------
 
