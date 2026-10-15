@@ -72,7 +72,9 @@ class KnowledgeViewModel @Inject constructor(
         if (_ui.value.checking || _ui.value.applying) return
         viewModelScope.launch {
             _ui.update { it.copy(checking = true, error = null, message = null, plan = null, reports = emptyList()) }
-            val result = repository.checkForUpdates()
+            // fresh = true：手动检查一律直取源站。开发者刚发布的新名单，
+            // 用户点一下就该看到，不能因为 CDN 缓存让他等几小时。
+            val result = repository.checkForUpdates(fresh = true)
             result.fold(
                 onSuccess = { plan ->
                     _ui.update {

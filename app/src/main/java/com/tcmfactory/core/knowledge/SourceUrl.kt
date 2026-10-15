@@ -56,4 +56,20 @@ object SourceUrl {
         val afterScheme = url.substringAfter("://", "")
         return afterScheme.substringBefore('/').ifBlank { url }
     }
+
+    /**
+     * 给地址附加时间戳查询参数，让 CDN 把它当成另一个文件，从而跳过缓存直取源站。
+     *
+     * 用途只有一个：用户手动点「检查更新」时，要立刻看到开发者刚发布的名单，
+     * 而不是「CDN 缓存过期后（最多 12 小时）才出现」。
+     *
+     * 注意**只对索引文件用**。知识包本体的文件名里带版本号，内容一变文件名就变，
+     * 天生免疫缓存，加时间戳反而会拖慢下载、失去 CDN 的意义。
+     *
+     * `stamp` 可注入是为了能写出确定性的单测 —— 默认取当前时间。
+     */
+    fun withCacheBuster(url: String, stamp: Long = System.currentTimeMillis()): String {
+        val sep = if (url.contains('?')) '&' else '?'
+        return "$url${sep}_=$stamp"
+    }
 }

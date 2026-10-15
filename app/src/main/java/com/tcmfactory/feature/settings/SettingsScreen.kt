@@ -101,6 +101,9 @@ class SettingsViewModel @Inject constructor(
 fun SettingsScreen(
     onOpenKnowledge: () -> Unit = {},
     onOpenStats: () -> Unit = {},
+    onOpenLegal: () -> Unit = {},
+    onOpenReward: () -> Unit = {},
+    onOpenSupporters: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -263,10 +266,17 @@ fun SettingsScreen(
                         不作为临床诊疗依据；如有疑义，请以最新版教材与国家标准为准。
 
                         用户自行导入的内容，其版权与准确性由导入者负责。
+
+                        打赏仅用于支持软件的开发与维护，与上述任何内容均无关联。
                     """.trimIndent(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                )
+                NavRow(
+                    title = "完整免责声明",
+                    subtitle = "医疗免责 · 数据丢失风险 · 打赏用途 · 第三方内容",
+                    onClick = onOpenLegal
                 )
             }
         }
@@ -317,7 +327,19 @@ fun SettingsScreen(
                         "核心功能完全离线可用；知识库更新为可选的联网增强。所有学习数据仅保存在本机。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp)
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 6.dp)
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                NavRow(
+                    title = "支持开发",
+                    subtitle = "本软件完全免费，所有功能无限制。打赏仅用于支持开发",
+                    onClick = onOpenReward
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                NavRow(
+                    title = "支持者名单",
+                    subtitle = "感谢愿意公开留名的每一位",
+                    onClick = onOpenSupporters
                 )
             }
         }

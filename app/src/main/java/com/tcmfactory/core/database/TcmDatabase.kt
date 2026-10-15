@@ -11,6 +11,7 @@ import com.tcmfactory.core.database.dao.CardDao
 import com.tcmfactory.core.database.dao.DeckDao
 import com.tcmfactory.core.database.dao.KnowledgeDao
 import com.tcmfactory.core.database.dao.QuizDao
+import com.tcmfactory.core.database.dao.SupporterDao
 import com.tcmfactory.core.database.dao.ReviewLogDao
 import com.tcmfactory.core.database.dao.StatsDao
 import com.tcmfactory.core.database.entity.BookChapterEntity
@@ -24,6 +25,7 @@ import com.tcmfactory.core.database.entity.QuizRecordEntity
 import com.tcmfactory.core.database.entity.QuizSessionEntity
 import com.tcmfactory.core.database.entity.ReviewLogEntity
 import com.tcmfactory.core.database.entity.StudyDailyStatsEntity
+import com.tcmfactory.core.database.entity.SupporterEntity
 import com.tcmfactory.core.database.entity.WrongQuestionEntity
 
 /**
@@ -48,9 +50,11 @@ import com.tcmfactory.core.database.entity.WrongQuestionEntity
         QuestionEntity::class,
         QuizSessionEntity::class,
         QuizRecordEntity::class,
-        WrongQuestionEntity::class
+        WrongQuestionEntity::class,
+        // 支持者名单（开源致谢，与学习内容无关）
+        SupporterEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class TcmDatabase : RoomDatabase() {
@@ -62,6 +66,7 @@ abstract class TcmDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
     abstract fun quizDao(): QuizDao
     abstract fun knowledgeDao(): KnowledgeDao
+    abstract fun supporterDao(): SupporterDao
 
     companion object {
         const val DB_NAME = "tcm_factory.db"
@@ -107,10 +112,37 @@ abstract class TcmDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v2 → v3：支持者名单表。
+         *
+         * 只新增一张表，不动任何既有表 —— 这是最安全的一类迁移：
+         * 即便迁移过程中断，用户的背诵进度、错题本、书签都不会受影响。
+         */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `supporters` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`packId` TEXT, " +
+                        "`externalId` TEXT, " +
+                        "`name` TEXT NOT NULL, " +
+                        "`message` TEXT, " +
+                        "`serial` INTEGER, " +
+                        "`displayDate` TEXT, " +
+                        "`sortOrder` INTEGER NOT NULL, " +
+                        "`updatedAt` INTEGER NOT NULL)"
+                )
+                db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS `index_supporters_packId_externalId` " +
+                        "ON `supporters` (`packId`, `externalId`)"
+                )
+            }
+        }
+
         fun build(context: Context, name: String = DB_NAME): TcmDatabase =
             Room.databaseBuilder(context.applicationContext, TcmDatabase::class.java, name)
                 .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .addCallback(object : RoomDatabase.Callback() {
                     override fun onOpen(db: SupportSQLiteDatabase) {
                         super.onOpen(db)

@@ -17,12 +17,12 @@
       tcm.materia.core.json      <- 每个文件是一个知识包（KnowledgePack 结构）
       tcm.formula.core.json
 
-知识包 JSON 结构（kind 三选一）：
+知识包 JSON 结构（kind 四选一）：
 {
   "schemaVersion": 1,
   "packId": "tcm.materia.core",
   "packName": "中药学 · 核心药材",
-  "kind": "cards",                      # cards | questions | book
+  "kind": "cards",                      # cards | questions | book | supporters
   "version": "1.1.0",
   "subject": "中药学",
   "license": "公有领域 / 国家标准事实数据 / 自编条目",
@@ -57,13 +57,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SCHEMA_VERSION = 1
-SUPPORTED_KINDS = ("cards", "questions", "book")
+SUPPORTED_KINDS = ("cards", "questions", "book", "supporters")
 
 # 与 App 端 KnowledgePack 的字段保持一致的必填校验
 REQUIRED_ITEM_FIELDS = {
     "cards": ("front", "back"),
     "questions": ("stem",),
     "book": ("title", "content"),
+    # 名单只有昵称必填：留言、日期、序号都可以省略
+    "supporters": ("name",),
 }
 
 # externalId 自动派生时使用的字段（顺序固定，改顺序会让所有 ID 变化）
@@ -72,6 +74,9 @@ ID_FIELDS = {
     "questions": ("subject", "stem"),
     "book": ("title",),
 }
+
+# 与 App 端 PackValidator.MAX_SUPPORTER_NAME_CHARS 保持一致
+MAX_SUPPORTER_NAME_CHARS = 24
 
 
 def sha256_hex(data: bytes) -> str:
@@ -86,6 +91,20 @@ def derive_external_id(kind: str, item: dict, pack: dict) -> str:
         sha256("\u0001".join(parts).strip each) -> hex -> 前 16 位
     不一致的话，App 会认为这是一条全新内容，导致更新后出现重复条目。
     """
+    if kind == "supporters":
+        # 名单重名很常见（多个"匿名""小王"），所以把序号或日期一并纳入派生键。
+        # ⚠️ 这段逻辑必须与 App 端 PackValidator.deriveExternalId 的分支逐字对应。
+        discriminator = item.get("serial")
+        if discriminator is None:
+            discriminator = (item.get("date") or "").strip()
+        if not discriminator:
+            discriminator = pack.get("subject") or pack.get("packName") or ""
+        raw = "\u0001".join([
+            str(item.get("name", "")).strip(),
+            str(discriminator).strip(),
+        ]).encode("utf-8")
+        return sha256_hex(raw)[:16]
+
     fields = ID_FIELDS.get(kind, ())
     parts = []
     for field in fields:
@@ -116,8 +135,12 @@ def validate_pack(pack: dict, path: Path) -> list[str]:
         problems.append(f"kind 必须是 {SUPPORTED_KINDS} 之一，当前为 {kind!r}")
 
     items = pack.get("items")
-    if not isinstance(items, list) or not items:
-        problems.append("items 为空或不是数组")
+    if not isinstance(items, list):
+        problems.append("items 不是数组")
+    elif not items and kind != "supporters":
+        # 名单允许为空 —— 「还没人打赏」是正常状态，不是错误。
+        # 其他类型空包没有任何意义，仍然拒绝。
+        problems.append("items 为空")
 
     return problems
 
@@ -193,7 +216,7 @@ def build(src_dir: Path, out_dir: Path, min_app_version: str | None) -> int:
             continue
 
         items, warnings = normalize_items(pack)
-        if not items:
+        if not items and pack.get("kind") != "supporters":
             print(f"[跳过] {file.name}：没有任何条目通过校验", file=sys.stderr)
             continue
         for w in warnings:

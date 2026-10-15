@@ -25,7 +25,19 @@ object PackKind {
     const val QUESTIONS = "questions"
     const val BOOK = "book"
 
-    val ALL = setOf(CARDS, QUESTIONS, BOOK)
+    /**
+     * 支持者名单。
+     *
+     * 之所以复用知识包通道而不是写死在 APK 里：打赏者名单会持续增加，
+     * 若每次都要等发版才能更新，用户就看不到自己的名字。
+     * 复用现有通道后，名单可以随时发布，用户点「检查更新」即可拿到最新名单。
+     *
+     * 注意：名单是**全量替换**而非增量合并 —— 包里的内容就是完整名单，
+     * 安装时先清空旧数据再写入。否则已退出名单的人会一直留在列表里。
+     */
+    const val SUPPORTERS = "supporters"
+
+    val ALL = setOf(CARDS, QUESTIONS, BOOK, SUPPORTERS)
 }
 
 /** 包的来源，用于界面展示与「用户自建内容不被覆盖」的判定。 */
@@ -158,4 +170,19 @@ data class BookItemDto(
     val dynasty: String? = null,
     /** 纯文本（已归一化）。客户端走 ChapterSplitter 切分。 */
     val content: String = ""
+)
+
+/** kind = supporters。公开致谢名单。 */
+@Serializable
+data class SupporterItemDto(
+    /** 稳定标识，用于排序稳定性；建议用「序号」或「昵称」，避免仅靠数组下标。 */
+    val externalId: String = "",
+    /** 展示用昵称。必填 —— 没有名字的致谢没有意义。 */
+    val name: String = "",
+    /** 可选留言。空字符串与 null 都视为未留。 */
+    val message: String? = null,
+    /** 打赏者码中的序号，便于与后台签发记录对应；可不填。 */
+    val serial: Long? = null,
+    /** 展示用日期（如 2026-10-15），仅作展示，不参与逻辑。 */
+    val date: String? = null
 )

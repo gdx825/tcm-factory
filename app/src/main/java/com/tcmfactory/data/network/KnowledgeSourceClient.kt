@@ -35,9 +35,15 @@ class KnowledgeSourceClient @Inject constructor(
      *
      * 为什么要多源：国内网络环境下个别 CDN 会阶段性不可达，
      * 与其给用户一句「更新失败」，不如自动换下一个镜像。
+     *
+     * @param fresh 为 true 时在索引地址上附加时间戳，绕开 CDN 缓存。
+     *   用户手动点「检查更新」时用 true —— 他刚在后台发布了新名单，
+     *   期待的是立刻看到，而不是「12 小时后才会出现」。
+     *   后台自动检查用 false，走缓存更快也更省流量。
      */
     suspend fun fetchManifestFromSources(
-        urls: List<String>
+        urls: List<String>,
+        fresh: Boolean = false
     ): Result<Pair<String, KnowledgeManifest>> {
         if (urls.isEmpty()) {
             return Result.failure(IllegalStateException("尚未配置知识库数据源"))
@@ -49,7 +55,7 @@ class KnowledgeSourceClient @Inject constructor(
                 failures.append("· $raw：地址格式非法\n")
                 continue
             }
-            val result = fetchManifest(base)
+            val result = fetchManifest(base, fresh = fresh)
             if (result.isSuccess) {
                 return Result.success(base to result.getOrThrow())
             }
@@ -64,10 +70,12 @@ class KnowledgeSourceClient @Inject constructor(
     /** 拉取索引。默认路径为源根目录下的 manifest.json。 */
     suspend fun fetchManifest(
         baseUrl: String,
-        path: String = "manifest.json"
+        path: String = "manifest.json",
+        fresh: Boolean = false
     ): Result<KnowledgeManifest> {
-        val url = SourceUrl.resolve(baseUrl, path)
+        val resolved = SourceUrl.resolve(baseUrl, path)
             ?: return Result.failure(IllegalArgumentException("无法解析索引地址：$baseUrl / $path"))
+        val url = if (fresh) SourceUrl.withCacheBuster(resolved) else resolved
         return getBytes(url, manifestLimit, null).mapCatching { PackCodec.parseManifest(it) }
     }
 

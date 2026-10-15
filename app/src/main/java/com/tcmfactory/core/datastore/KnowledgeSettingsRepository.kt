@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.tcmfactory.core.knowledge.OfficialSources
 import com.tcmfactory.core.knowledge.SourceUrl
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -97,6 +98,31 @@ class KnowledgeSettingsRepository @Inject constructor(
         context.knowledgeDataStore.edit { it[Keys.BUNDLED_PACKS_VERSION] = version }
     }
 
+    /**
+     * 首次启动时写入官方数据源，让「检查更新」开箱可用。
+     *
+     * 只做一次：完成后打上 [Keys.DEFAULTS_SEEDED] 标记。
+     * 用户若把这些源删掉，下次启动**不会**再被加回来 ——
+     * 否则「删了又回来」会让人以为界面出了 bug。
+     *
+     * 已存在的地址不重复添加，也顺带兼容了「先手动填过官方源」的老用户。
+     */
+    suspend fun seedOfficialSourcesOnce() {
+        if (context.knowledgeDataStore.data.first()[Keys.DEFAULTS_SEEDED] == true) return
+        context.knowledgeDataStore.edit { prefs ->
+            // edit 在并发写入时会重放整个 lambda，所以标记位要在 lambda 内部再判一次，
+            // 否则两个协程同时进来会重复执行添加逻辑。
+            if (prefs[Keys.DEFAULTS_SEEDED] == true) return@edit
+            val existing = prefs[Keys.URLS].orEmpty()
+                .split("\n")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+            val appended = OfficialSources.URLS.filter { it !in existing }
+            prefs[Keys.URLS] = (existing + appended).joinToString("\n")
+            prefs[Keys.DEFAULTS_SEEDED] = true
+        }
+    }
+
     private fun Preferences.toSources() = KnowledgeSources(
         urls = this[Keys.URLS].orEmpty()
             .split("\n")
@@ -113,5 +139,6 @@ class KnowledgeSettingsRepository @Inject constructor(
         val AUTO_CHECK = booleanPreferencesKey("auto_check")
         val LAST_CHECK_AT = longPreferencesKey("last_check_at")
         val BUNDLED_PACKS_VERSION = stringPreferencesKey("bundled_packs_version")
+        val DEFAULTS_SEEDED = booleanPreferencesKey("defaults_seeded")
     }
 }

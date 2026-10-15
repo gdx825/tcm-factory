@@ -6,10 +6,12 @@ import com.tcmfactory.core.database.TcmDatabase
 import com.tcmfactory.core.database.dao.CardDao
 import com.tcmfactory.core.database.dao.DeckDao
 import com.tcmfactory.core.database.dao.KnowledgeDao
+import com.tcmfactory.core.database.dao.SupporterDao
 import com.tcmfactory.core.database.entity.CardEntity
 import com.tcmfactory.core.database.entity.DeckEntity
 import com.tcmfactory.core.database.entity.KnowledgePackVersionEntity
 import com.tcmfactory.core.database.entity.QuestionEntity
+import com.tcmfactory.core.database.entity.SupporterEntity
 import com.tcmfactory.core.knowledge.CardItemDto
 import com.tcmfactory.core.knowledge.ExternalId
 import com.tcmfactory.core.knowledge.InstalledPackInfo
@@ -90,7 +92,8 @@ class KnowledgeRepository @Inject constructor(
     private val cardDao: CardDao,
     private val bookRepository: BookRepository,
     private val sourceClient: KnowledgeSourceClient,
-    private val sourceSettings: KnowledgeSettingsRepository
+    private val sourceSettings: KnowledgeSettingsRepository,
+    private val supporterDao: SupporterDao
 ) {
 
     // ================= 查询 =================
@@ -119,9 +122,9 @@ class KnowledgeRepository @Inject constructor(
     /**
      * 检查更新。不写数据库，只产出计划，方便界面先给用户看「将要发生什么」。
      */
-    suspend fun checkForUpdates(): Result<UpdatePlan> = withContext(Dispatchers.IO) {
+    suspend fun checkForUpdates(fresh: Boolean = false): Result<UpdatePlan> = withContext(Dispatchers.IO) {
         val sources = sourceSettings.current()
-        val manifestResult = sourceClient.fetchManifestFromSources(sources.urls)
+        val manifestResult = sourceClient.fetchManifestFromSources(sources.urls, fresh = fresh)
         val manifest = manifestResult.getOrElse { return@withContext Result.failure(it) }
 
         val plan = UpdatePlanner.plan(
@@ -276,6 +279,11 @@ class KnowledgeRepository @Inject constructor(
                 }
                 PackKind.BOOK -> {
                     val r = writeBooks(pack, parsed, warnings)
+                    added = r.first
+                    updated = r.second
+                }
+                PackKind.SUPPORTERS -> {
+                    val r = writeSupporters(pack, parsed, now)
                     added = r.first
                     updated = r.second
                 }
@@ -439,6 +447,39 @@ class KnowledgeRepository @Inject constructor(
             }
         }
         return added to updated
+    }
+
+    /**
+     * 写入支持者名单。
+     *
+     * 与其他包**语义不同**：名单是「整包替换」而不是「逐条 upsert」。
+     *
+     * 原因是名单会变小 —— 有人要求撤下自己的名字时，增量方式永远删不掉那一行。
+     * 因此这里先按 packId 清空旧记录，再整体写入新名单。
+     *
+     * 返回值把 (added, updated) 解释为 (条目数, 0)：
+     * 对「全量替换」来说，区分新增与更新没有意义，界面只需要知道总数。
+     */
+    private suspend fun writeSupporters(
+        pack: KnowledgePack,
+        parsed: ParsedPack,
+        now: Long
+    ): Pair<Int, Int> {
+        val entities = parsed.supporters.mapIndexed { index, dto ->
+            SupporterEntity(
+                packId = pack.packId,
+                externalId = dto.externalId,
+                name = dto.name.trim(),
+                message = dto.message?.trim()?.takeUnless { it.isEmpty() },
+                serial = dto.serial,
+                displayDate = dto.date?.trim()?.takeUnless { it.isEmpty() },
+                // 顺序以包内顺序为准：打包工具已按打赏时间倒序排好
+                sortOrder = index,
+                updatedAt = now
+            )
+        }
+        supporterDao.replacePack(pack.packId, entities)
+        return entities.size to 0
     }
 
     private suspend fun writeBooks(

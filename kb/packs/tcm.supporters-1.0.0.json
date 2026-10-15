@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "packId": "tcm.supporters",
+  "packName": "支持者名单",
+  "kind": "supporters",
+  "version": "1.0.0",
+  "description": "感谢每一位支持过这个项目的人。本名单仅收录主动同意公开留名的支持者。",
+  "sourceNote": "名单由开发者维护。如需加入、更改昵称或要求撤下自己的名字，请通过项目页面联系。",
+  "items": []
+}

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-15T05:21:36Z",
+  "packs": [
+    {
+      "packId": "tcm.acupoint.core",
+      "packName": "针灸学 · 腧穴定位与经络",
+      "kind": "cards",
+      "version": "1.0.0",
+      "subject": "针灸学",
+      "description": "考研与执医高频腧穴的定位归经，以及十二正经与奇经八脉的循行要点。定位依据国家标准 GB/T 12346-2021。",
+      "license": "国家标准事实数据 / 自编条目",
+      "itemCount": 58,
+      "bytes": 27445,
+      "sha256": "5b3c9b151734c4c427e3fff29252265135162445d009a60025f31b73da7db607",
+      "url": "packs/tcm.acupoint.core-1.0.0.json"
+    },
+    {
+      "packId": "tcm.basic.core",
+      "packName": "中基中诊 · 核心概念",
+      "kind": "cards",
+      "version": "1.0.0",
+      "subject": "中医基础理论",
+      "description": "中医基础理论与中医诊断学的核心概念，覆盖阴阳五行、藏象、气血津液、病因病机、治则与四诊、八纲、脏腑辨证。",
+      "license": "自编条目（中医基础理论属公有领域传统知识）",
+      "itemCount": 39,
+      "bytes": 19626,
+      "sha256": "63f31c9f72464b63a078d3f1c1590f52ebf255aa2093dcbb6548be99bcf0f8d1",
+      "url": "packs/tcm.basic.core-1.0.0.json"
+    },
+    {
+      "packId": "tcm.classics.core",
+      "packName": "中医经典 · 条文背诵",
+      "kind": "cards",
+      "version": "1.0.0",
+      "subject": "中医经典",
+      "description": "《伤寒论》《金匮要略》《黄帝内经》《温病条辨》的高频条文，覆盖辨证提纲、治法大要与名句出处。",
+      "license": "公有领域古籍原文",
+      "itemCount": 34,
+      "bytes": 17469,
+      "sha256": "7dfe329d705bc3b5efab80efc5fb8dbae36cca26a35557acb8557df0fb470b2f",
+      "url": "packs/tcm.classics.core-1.0.0.json"
+    },
+    {
+      "packId": "tcm.formula.core",
+      "packName": "方剂学 · 分类方剂",
+      "kind": "cards",
+      "version": "1.0.0",
+      "subject": "方剂学",
+      "description": "按治法分类的常用方剂，覆盖泻下、和解、清热、温里、补益、固涩、安神、理气、理血、治风、祛湿、祛痰、消食共 13 类，含组成、功用与主治。",
+      "license": "自编条目（方剂组成为公有领域传统知识）",
+      "itemCount": 58,
+      "bytes": 27693,
+      "sha256": "bb448888d5d7baaa431fbb81603162afd2769d7ef01844fb6d2228e5be191546",
+      "url": "packs/tcm.formula.core-1.0.0.json"
+    },
+    {
+      "packId": "tcm.materia.core",
+      "packName": "中药学 · 分类功效",
+      "kind": "cards",
+      "version": "1.0.0",
+      "subject": "中药学",
+      "description": "按功效分类的常用中药，覆盖解表、清热、泻下、祛风湿、化湿、利水、温里、理气、消食、止血、活血、化痰、安神、平肝、开窍、补益、收涩共 20 类。",
+      "license": "国家标准事实数据 / 自编条目",
+      "itemCount": 173,
+      "bytes": 62813,
+      "sha256": "88711b88dc16a5da634bb170024da3a8cb38f092f3a67ca342ac819f35f937d2",
+      "url": "packs/tcm.materia.core-1.0.0.json"
+    },
+    {
+      "packId": "tcm.quiz.core",
+      "packName": "题库 · 六科综合练习",
+      "kind": "questions",
+      "version": "1.1.0",
+      "subject": "中药学",
+      "description": "覆盖中药、方剂、针灸、中基、中诊、经典六科的练习题，含单选、多选、判断三种题型。",
+      "license": "自编题目",
+      "itemCount": 61,
+      "bytes": 34015,
+      "sha256": "b0f9baac2d7faf4ef497b0d14ff56046ba2bbc7f92b7a72013dcf87858f38877",
+      "url": "packs/tcm.quiz.core-1.1.0.json"
+    },
+    {
+      "packId": "tcm.quiz.internal",
+      "packName": "题库 · 中医内科学",
+      "kind": "questions",
+      "version": "1.0.0",
+      "subject": "中医内科学",
+      "description": "中医内科学常见病证的辨证要点与代表方剂，覆盖感冒、咳嗽、哮病、喘证、肺痨、心悸、胸痹、不寐、胃痛、呕吐、泄泻、痢疾、便秘、胁痛、黄疸、水肿、淋证、消渴、眩晕、中风、血证、郁证、痹证等 23 个病证。",
+      "license": "自编题目",
+      "itemCount": 33,
+      "bytes": 20605,
+      "sha256": "b793c1d1481dc615cb497f7ba3d0374bdc0a4da36ecf2b19267ea329c5d770a9",
+      "url": "packs/tcm.quiz.internal-1.0.0.json"
+    },
+    {
+      "packId": "tcm.supporters",
+      "packName": "支持者名单",
+      "kind": "supporters",
+      "version": "1.0.0",
+      "subject": null,
+      "description": "感谢每一位支持过这个项目的人。本名单仅收录主动同意公开留名的支持者。",
+      "license": null,
+      "itemCount": 0,
+      "bytes": 408,
+      "sha256": "5d108cd979e6f7e203fdf42cb8fe8a0afcdd85b3f2b76293347750666dbdfc6d",
+      "url": "packs/tcm.supporters-1.0.0.json"
+    }
+  ]
+}

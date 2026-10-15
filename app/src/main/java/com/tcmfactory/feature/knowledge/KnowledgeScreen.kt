@@ -56,6 +56,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tcmfactory.core.knowledge.OfficialSources
 import com.tcmfactory.core.knowledge.PackKind
 import com.tcmfactory.core.knowledge.PackSource
 import com.tcmfactory.core.knowledge.PlanItem
@@ -526,12 +527,22 @@ private fun SourceSettingsCard(state: KnowledgeUiState, viewModel: KnowledgeView
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = url,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontFamily = FontFamily.Monospace,
-                        modifier = Modifier.weight(1f)
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        // 官方源给出中文短名，否则用户看到的就是一串 jsDelivr 网址，
+                        // 既不知道是谁的、也不敢删。
+                        OfficialSources.displayName(url)?.let { label ->
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Text(
+                            text = url,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
                     IconButton(onClick = { viewModel.removeSource(url) }) {
                         Icon(Icons.Outlined.Close, contentDescription = "移除", modifier = Modifier.size(18.dp))
                     }
@@ -540,7 +551,7 @@ private fun SourceSettingsCard(state: KnowledgeUiState, viewModel: KnowledgeView
 
             if (state.sources.urls.isEmpty()) {
                 Text(
-                    text = "尚未添加数据源。",
+                    text = "尚未添加数据源。点下方「填入官方源」即可接收题库与支持者名单更新。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -575,10 +586,12 @@ private fun SourceSettingsCard(state: KnowledgeUiState, viewModel: KnowledgeView
                 Spacer(Modifier.width(8.dp))
                 OutlinedButton(
                     onClick = {
-                        input = "https://cdn.jsdelivr.net/gh/你的用户名/你的仓库@main/kb"
+                        // 只填主源。其余镜像由「恢复官方源」一并补上，
+                        // 避免用户手动连点三次还不知道自己漏了哪个。
+                        input = OfficialSources.URLS.first()
                     }
                 ) {
-                    Text("填入示例")
+                    Text("填入官方源")
                 }
             }
 

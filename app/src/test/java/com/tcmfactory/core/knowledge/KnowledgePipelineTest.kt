@@ -5,6 +5,7 @@ import kotlinx.serialization.json.put
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -177,6 +178,45 @@ class KnowledgePipelineTest {
         assertEquals("192.168.1.5", SourceUrl.hostOf("http://192.168.1.5/kb/manifest.json"))
     }
 
+    @Test
+    fun `时间戳参数用问号追加`() {
+        assertEquals(
+            "https://cdn.jsdelivr.net/gh/u/r@main/kb/manifest.json?_=1700000000000",
+            SourceUrl.withCacheBuster(
+                "https://cdn.jsdelivr.net/gh/u/r@main/kb/manifest.json",
+                stamp = 1700000000000L
+            )
+        )
+    }
+
+    @Test
+    fun `地址已带参数时改用与号追加`() {
+        // 拼成两个问号的地址虽然多数服务器也认，但属于明显写错的痕迹，
+        // 而这类错误只会出现在"用户自定义源带参数"的场景里，很难被发现。
+        assertEquals(
+            "https://example.com/kb/manifest.json?v=2&_=1700000000000",
+            SourceUrl.withCacheBuster(
+                "https://example.com/kb/manifest.json?v=2",
+                stamp = 1700000000000L
+            )
+        )
+    }
+
+    @Test
+    fun `加时间戳后地址不被判为非法`() {
+        // normalize 只拒绝"缺主机名 / 含空格 / scheme 不对"，参数不在其列。
+        // 这里是在守一个更基本的事实：绕缓存这个动作不能把地址本身弄坏。
+        val busted = SourceUrl.withCacheBuster("https://example.com/kb/manifest.json", 1L)
+        assertNotNull(SourceUrl.normalize(busted))
+        assertTrue(busted.startsWith("https://example.com/kb/manifest.json"))
+    }
+
+    @Test
+    fun `不同时刻产生不同地址`() {
+        val url = "https://example.com/kb/manifest.json"
+        assertNotEquals(SourceUrl.withCacheBuster(url, 1L), SourceUrl.withCacheBuster(url, 2L))
+    }
+
     // ==================================================================
     //  更新决策
     // ==================================================================
@@ -311,6 +351,83 @@ class KnowledgePipelineTest {
     // ==================================================================
     //  包内容校验
     // ==================================================================
+
+    // ---------------- 支持者名单 ----------------
+
+    private fun supporterJson(
+        name: String,
+        serial: Long? = null,
+        date: String? = null,
+        message: String? = null
+    ) = buildJsonObject {
+        put("name", name)
+        serial?.let { put("serial", it) }
+        date?.let { put("date", it) }
+        message?.let { put("message", it) }
+    }
+
+    @Test
+    fun `名单包可以正常解析`() {
+        val pack = packOf(
+            PackKind.SUPPORTERS,
+            listOf(
+                supporterJson("张三", serial = 1001, message = "加油"),
+                supporterJson("李四", serial = 1002)
+            )
+        )
+        val parsed = PackValidator.parse(pack)
+        assertEquals(2, parsed.validCount)
+        assertEquals(0, parsed.errors.size)
+        assertEquals(listOf("张三", "李四"), parsed.supporters.map { it.name })
+    }
+
+    @Test
+    fun `空名单包被放行而不是判为损坏`() {
+        // 「还没人打赏」是正常状态。若沿用「零条目即整包拒绝」的规则，
+        // 初始的空名单包会安装失败，用户看到的是「安装失败」而不是「还没有人留名」。
+        val pack = packOf(PackKind.SUPPORTERS, emptyList(), packId = "tcm.supporters")
+        assertNull(PackValidator.rejectReason(pack, "tcm.supporters"))
+        assertFalse(PackValidator.shouldRejectAsWhole(PackValidator.parse(pack)))
+    }
+
+    @Test
+    fun `其他类型的空包仍然被拒绝`() {
+        // 放行空包只针对名单，卡片/题库的空包依然没有意义
+        val cardPack = packOf(PackKind.CARDS, emptyList())
+        assertTrue(PackValidator.shouldRejectAsWhole(PackValidator.parse(cardPack)))
+
+        val questionPack = packOf(PackKind.QUESTIONS, emptyList())
+        assertTrue(PackValidator.shouldRejectAsWhole(PackValidator.parse(questionPack)))
+    }
+
+    @Test
+    fun `名单重名时通过日期或序号区分而不被丢弃`() {
+        // 名单里重名很常见（多个"匿名"）。若 externalId 只用昵称派生，
+        // 第二条同名人会被判为「ID 重复」而整条丢弃 —— 用户会以为自己的名字没上墙。
+        val pack = packOf(
+            PackKind.SUPPORTERS,
+            listOf(
+                supporterJson("匿名", serial = 1),
+                supporterJson("匿名", serial = 2),
+                supporterJson("匿名", date = "2026-10-01"),
+                supporterJson("匿名", date = "2026-10-02")
+            )
+        )
+        val parsed = PackValidator.parse(pack)
+        assertEquals(4, parsed.validCount, "四条同名条目应全部保留")
+        assertEquals(4, parsed.supporters.map { it.externalId }.toSet().size, "externalId 应互不相同")
+    }
+
+    @Test
+    fun `名单昵称为空时该条被跳过`() {
+        val pack = packOf(
+            PackKind.SUPPORTERS,
+            listOf(supporterJson(""), supporterJson("  "), supporterJson("正常"))
+        )
+        val parsed = PackValidator.parse(pack)
+        assertEquals(1, parsed.validCount)
+        assertEquals(2, parsed.errors.size)
+    }
 
     private fun cardJson(id: String, front: String = "桂枝的功效", back: String = "发汗解肌") =
         buildJsonObject {

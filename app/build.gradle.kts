@@ -17,8 +17,8 @@ android {
         applicationId = "com.tcmfactory"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.5.3"
+        versionCode = 13
+        versionName = "2.0.3"
         vectorDrawables { useSupportLibrary = true }
     }
 

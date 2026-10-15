@@ -27,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.tcmfactory.core.datastore.LegalRepository
 import com.tcmfactory.core.datastore.SettingsRepository
 import com.tcmfactory.core.datastore.UserSettings
 import com.tcmfactory.feature.common.PlaceholderScreen
@@ -38,20 +39,43 @@ import com.tcmfactory.feature.reader.ReaderScreen
 import com.tcmfactory.feature.recite.CardManageScreen
 import com.tcmfactory.feature.recite.CardReviewScreen
 import com.tcmfactory.feature.recite.ReciteHomeScreen
+import com.tcmfactory.feature.legal.LegalDetailScreen
 import com.tcmfactory.feature.settings.SettingsScreen
+import com.tcmfactory.feature.supporter.RewardScreen
+import com.tcmfactory.feature.supporter.SupporterListScreen
 import com.tcmfactory.feature.stats.StatsScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
-    settingsRepository: SettingsRepository
+    settingsRepository: SettingsRepository,
+    private val legalRepository: LegalRepository
 ) : ViewModel() {
+
     val settings: StateFlow<UserSettings> = settingsRepository.settings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UserSettings())
+
+    /**
+     * 是否已同意当前版本的免责条款。
+     *
+     * 初始值给 `null` 而不是 `false`，是为了区分「还在从磁盘读」与「确实没同意过」。
+     * 若初始值给 false，已经同意过的老用户每次启动都会先闪一下条款页再跳进主界面 ——
+     * 这一帧的闪烁足以让人以为"又要我同意一次"。
+     *
+     * 用 Eagerly 而非 WhileSubscribed：这个判断发生在界面绘制前，
+     * 早一点开始读取就能少等一点。
+     */
+    val legalAccepted: StateFlow<Boolean?> = legalRepository.isCurrentVersionAccepted
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    fun acceptLegal() {
+        viewModelScope.launch { legalRepository.accept() }
+    }
 }
 
 object Routes {
@@ -65,6 +89,12 @@ object Routes {
     const val PROFILE = "profile"
     const val KNOWLEDGE = "knowledge"
     const val STATS = "stats"
+    /** 支持开发（打赏入口） */
+    const val REWARD = "reward"
+    /** 公开支持者名单 */
+    const val SUPPORTERS = "supporters"
+    /** 完整免责条款（设置页入口；首次启动的确认页直接复用同一界面） */
+    const val LEGAL = "legal"
 
     fun read(bookId: Long, offset: Int? = null) = "read/$bookId?offset=${offset ?: -1}"
 
@@ -193,7 +223,25 @@ fun AppNavigation(settings: UserSettings) {
             composable(Routes.PROFILE) {
                 SettingsScreen(
                     onOpenKnowledge = { navController.navigate(Routes.KNOWLEDGE) },
-                    onOpenStats = { navController.navigate(Routes.STATS) }
+                    onOpenStats = { navController.navigate(Routes.STATS) },
+                    onOpenLegal = { navController.navigate(Routes.LEGAL) },
+                    onOpenReward = { navController.navigate(Routes.REWARD) },
+                    onOpenSupporters = { navController.navigate(Routes.SUPPORTERS) }
+                )
+            }
+            composable(Routes.LEGAL) {
+                LegalDetailScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Routes.REWARD) {
+                RewardScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenSupporterList = { navController.navigate(Routes.SUPPORTERS) }
+                )
+            }
+            composable(Routes.SUPPORTERS) {
+                SupporterListScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenReward = { navController.navigate(Routes.REWARD) }
                 )
             }
             composable(Routes.KNOWLEDGE) {

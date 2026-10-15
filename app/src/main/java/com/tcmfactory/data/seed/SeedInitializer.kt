@@ -38,12 +38,26 @@ class SeedInitializer @Inject constructor(
 ) {
 
     suspend fun seedIfNeeded() = withContext(Dispatchers.IO) {
+        // 先写官方数据源：这步极轻（一次 DataStore 写入），
+        // 且决定了「知识库」页首次打开时是「已配置」还是「尚未配置」。
+        seedOfficialSources()
         seedCards()
         seedBooks()
         // 必须先清掉早期版本写在库里的内置题库，再由知识包装入正确内容，
         // 否则同一道题会出现两次（详见 purgeLegacyBuiltinQuestions 的说明）。
         purgeLegacyBuiltinQuestions()
         installBundledKnowledgePacks()
+    }
+
+    /**
+     * 写入官方知识库数据源（仅首次）。
+     *
+     * 目的是让用户不必知道「数据源地址」这个概念，装完就能点「检查更新」
+     * 拿到最新的题库与支持者名单。用户删掉后不会自动加回。
+     */
+    private suspend fun seedOfficialSources() {
+        runCatching { knowledgeSettings.seedOfficialSourcesOnce() }
+            .onFailure { Log.w(TAG, "写入官方数据源失败", it) }
     }
 
     /**

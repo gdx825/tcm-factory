@@ -8,6 +8,7 @@ import com.tcmfactory.core.database.dao.CardDao
 import com.tcmfactory.core.database.dao.DeckDao
 import com.tcmfactory.core.database.dao.KnowledgeDao
 import com.tcmfactory.core.database.dao.QuizDao
+import com.tcmfactory.core.database.dao.SupporterDao
 import com.tcmfactory.core.database.dao.ReviewLogDao
 import com.tcmfactory.core.database.dao.StatsDao
 import dagger.Module
@@ -46,4 +47,7 @@ object DatabaseModule {
 
     @Provides
     fun provideKnowledgeDao(db: TcmDatabase): KnowledgeDao = db.knowledgeDao()
+
+    @Provides
+    fun provideSupporterDao(db: TcmDatabase): SupporterDao = db.supporterDao()
 }

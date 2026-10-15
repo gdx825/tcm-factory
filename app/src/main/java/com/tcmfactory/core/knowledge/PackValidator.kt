@@ -17,10 +17,11 @@ data class ParsedPack(
     val cards: List<CardItemDto>,
     val questions: List<QuestionItemDto>,
     val books: List<BookItemDto>,
+    val supporters: List<SupporterItemDto>,
     val errors: List<ItemIssue>,
     val warnings: List<ItemIssue>
 ) {
-    val validCount: Int get() = cards.size + questions.size + books.size
+    val validCount: Int get() = cards.size + questions.size + books.size + supporters.size
     val totalCount: Int get() = validCount + errors.size
 
     /** 错误条目占比。整包损坏时用它兜底拒绝。 */
@@ -55,6 +56,9 @@ object PackValidator {
     const val MAX_ITEMS = 20_000
     const val MAX_CONTENT_CHARS = 8 * 1024 * 1024
 
+    /** 名单昵称长度上限，防止有人在致谢名单里塞整段广告。 */
+    const val MAX_SUPPORTER_NAME_CHARS = 24
+
     private val PACK_ID_PATTERN = Regex("^[a-z0-9][a-z0-9._-]{1,63}$")
 
     /**
@@ -70,7 +74,9 @@ object PackValidator {
         !PACK_ID_PATTERN.matches(pack.packId) -> "packId 含非法字符：${pack.packId}"
         pack.version.isBlank() -> "version 为空"
         pack.kind !in PackKind.ALL -> "未知的 kind：${pack.kind}"
-        pack.items.isEmpty() -> "包内没有任何条目"
+        // 名单包允许为空：「还没人打赏」是正常状态。
+        // 其他类型空包没有任何意义，仍然拒绝。
+        pack.kind != PackKind.SUPPORTERS && pack.items.isEmpty() -> "包内没有任何条目"
         pack.items.size > MAX_ITEMS -> "包内条目数 ${pack.items.size} 超过上限 $MAX_ITEMS"
         else -> null
     }
@@ -82,6 +88,7 @@ object PackValidator {
         val cards = ArrayList<CardItemDto>()
         val questions = ArrayList<QuestionItemDto>()
         val books = ArrayList<BookItemDto>()
+        val supporters = ArrayList<SupporterItemDto>()
         val errors = ArrayList<ItemIssue>()
         val warnings = ArrayList<ItemIssue>()
         val seenIds = HashSet<String>()
@@ -92,6 +99,7 @@ object PackValidator {
                 PackKind.CARDS -> runCatching { KnowledgeJson.decodeFromJsonElement<CardItemDto>(element) }.getOrNull()
                 PackKind.QUESTIONS -> runCatching { KnowledgeJson.decodeFromJsonElement<QuestionItemDto>(element) }.getOrNull()
                 PackKind.BOOK -> runCatching { KnowledgeJson.decodeFromJsonElement<BookItemDto>(element) }.getOrNull()
+                PackKind.SUPPORTERS -> runCatching { KnowledgeJson.decodeFromJsonElement<SupporterItemDto>(element) }.getOrNull()
                 else -> null
             }
 
@@ -104,6 +112,7 @@ object PackValidator {
                 is CardItemDto -> parsed.externalId
                 is QuestionItemDto -> parsed.externalId
                 is BookItemDto -> parsed.externalId
+                is SupporterItemDto -> parsed.externalId
                 else -> ""
             }.trim()
 
@@ -150,6 +159,11 @@ object PackValidator {
                         }
                     }
                 }
+                is SupporterItemDto -> {
+                    val msg = validateSupporter(parsed)
+                    if (msg != null) errors += ItemIssue(index, externalId, msg)
+                    else supporters += parsed.copy(externalId = externalId)
+                }
             }
         }
 
@@ -158,6 +172,7 @@ object PackValidator {
             PackKind.CARDS -> cards.size
             PackKind.QUESTIONS -> questions.size
             PackKind.BOOK -> books.size
+            PackKind.SUPPORTERS -> supporters.size
             else -> 0
         }
         if (expectedType == 0 && pack.items.isNotEmpty()) {
@@ -170,7 +185,7 @@ object PackValidator {
             )
         }
 
-        return ParsedPack(pack, cards, questions, books, errors, warnings)
+        return ParsedPack(pack, cards, questions, books, supporters, errors, warnings)
     }
 
     /**
@@ -190,12 +205,26 @@ object PackValidator {
                 ExternalId.of(subject, item.stem)
             }
             is BookItemDto -> ExternalId.of(item.title)
+            // 名单里重名很常见（多个"匿名""小王"），所以把序号或日期一并纳入派生键，
+            // 否则第二个同名人会被判为「ID 重复」而整条丢弃。
+            is SupporterItemDto -> {
+                val discriminator = item.serial?.toString()
+                    ?: item.date?.trim().takeUnless { it.isNullOrEmpty() }
+                    ?: fallback
+                ExternalId.of(item.name, discriminator)
+            }
             else -> ""
         }
     }
 
     /** 错误率是否高到应当整体回退。 */
     fun shouldRejectAsWhole(parsed: ParsedPack): Boolean {
+        // 名单包允许为空 —— 「还没人打赏」是完全正常的状态，不是数据损坏。
+        // 若照搬「零条目即拒绝」的规则，初始的空名单包会被拒，
+        // 用户进名单页会看到「安装失败」而不是「暂时还没有人留名」。
+        // 校验有错时仍然拒绝，这条豁免只针对"合法的空"。
+        if (parsed.pack.kind == PackKind.SUPPORTERS && parsed.errors.isEmpty()) return false
+
         // 一条有效内容都没有，这个包无论如何都不该被接受
         if (parsed.validCount == 0) return true
         // 坏条目太少时不看比例，避免小包被误伤
@@ -221,6 +250,19 @@ object PackValidator {
     private fun validateBook(dto: BookItemDto): String? = when {
         dto.title.isBlank() -> "古籍标题为空"
         dto.content.isBlank() -> "古籍正文为空"
+        else -> null
+    }
+
+    /**
+     * 名单条目的校验从宽：昵称必填，其余都可省略。
+     *
+     * 不为「留言长度」设上限之类的是刻意的 —— 名单只有几十条，
+     * 真正需要防的是几千条的大包，为它增加规则只会让名单更难维护。
+     */
+    private fun validateSupporter(dto: SupporterItemDto): String? = when {
+        dto.name.isBlank() -> "支持者昵称为空"
+        dto.name.length > MAX_SUPPORTER_NAME_CHARS ->
+            "支持者昵称过长（${dto.name.length} 字，上限 $MAX_SUPPORTER_NAME_CHARS）"
         else -> null
     }
 }
